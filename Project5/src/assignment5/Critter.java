@@ -6,7 +6,7 @@
  * Slip days used: 0
  * Fall 2016
  */
-package assignment4;
+package assignment5;
 import java.io.PrintStream;
 import java.util.List;
 
@@ -34,6 +34,8 @@ public abstract class Critter {
 	protected boolean walkRun=false;
 	//boolean to keep track whether walkRun is being called in doTimeStep or in fight
 	protected boolean inTimeStep=false; //Set to false when doing a time step but set to true otherwise
+	protected int oldX=0;
+	protected int oldY=0;
 	
 
 	// Gets the package name.  This assumes that Critter and its subclasses are all in the same package.
@@ -80,7 +82,53 @@ public abstract class Critter {
 		}
 		energy-=Params.walk_energy_cost;
 	}
-	
+	protected String look(int direction, boolean steps){
+		int x_coord=this.x_coord;
+		int y_coord=this.y_coord;
+		int stepsActual;
+		if(steps){
+			stepsActual=2;
+		}else{
+			stepsActual=1;
+		}
+		if(direction==0 || direction==1 || direction==7){
+			x_coord+=stepsActual;
+		}
+		if(direction==3 || direction==4 || direction==5){
+			x_coord-=stepsActual;
+		}
+		if(direction==1 || direction==2 || direction==3){
+			y_coord-=stepsActual;
+		}
+		if(direction==5 || direction==6 || direction==7){
+			y_coord+=stepsActual;
+		}
+		if(x_coord<0){
+			x_coord+=Params.world_width;
+		}
+		if(y_coord<0){
+			y_coord+=Params.world_height;
+		}
+		x_coord=x_coord%Params.world_width;
+		y_coord=y_coord%Params.world_height;
+		
+		energy-=Params.look_energy_cost;
+		
+		
+		for(Critter c:population){
+			if(inTimeStep){
+				if(c.energy>0 && c.oldX==this.oldX && c.oldY==this.oldY){
+					return c.toString();
+				}
+			}else{
+				if(c.energy>0 && c.x_coord==this.x_coord && c.y_coord==this.y_coord){
+					return c.toString();
+				}
+			}
+		}
+		return null;
+		
+	}
 	/**
 	 * Checks if the Critter can move into the spot specified by steps and direction in relation to Critter's current position
 	 * @param steps Number of steps to take in direction
@@ -349,6 +397,8 @@ public abstract class Critter {
 	 * Simulates one time step of the world
 	 */
 	public static void worldTimeStep() {
+		//Set the old x and y values for each critter; implemented to satisfy look method requirements
+		setOldXandY();
 		//Do time step for each critter
 		doTimeStepForEachCritter();
 		//Resolve encounters over overlapping critters
@@ -363,6 +413,12 @@ public abstract class Critter {
 		addBabies();
 		//Make the new display grid
 		makeGrid();
+	}
+	public static void setOldXandY(){
+		for(Critter c:population){
+			c.oldX=c.x_coord;
+			c.oldY=c.y_coord;
+		}
 	}
 	
 	/**
