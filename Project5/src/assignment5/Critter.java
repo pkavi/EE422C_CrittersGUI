@@ -83,8 +83,8 @@ public abstract class Critter {
 		energy-=Params.walk_energy_cost;
 	}
 	protected String look(int direction, boolean steps){
-		int x_coord=this.x_coord;
-		int y_coord=this.y_coord;
+		int x_coordFuture=this.x_coord;
+		int y_coordFuture=this.y_coord;
 		int stepsActual;
 		if(steps){
 			stepsActual=2;
@@ -92,36 +92,36 @@ public abstract class Critter {
 			stepsActual=1;
 		}
 		if(direction==0 || direction==1 || direction==7){
-			x_coord+=stepsActual;
+			x_coordFuture+=stepsActual;
 		}
 		if(direction==3 || direction==4 || direction==5){
-			x_coord-=stepsActual;
+			x_coordFuture-=stepsActual;
 		}
 		if(direction==1 || direction==2 || direction==3){
-			y_coord-=stepsActual;
+			y_coordFuture-=stepsActual;
 		}
 		if(direction==5 || direction==6 || direction==7){
-			y_coord+=stepsActual;
+			y_coordFuture+=stepsActual;
 		}
-		if(x_coord<0){
-			x_coord+=Params.world_width;
+		if(x_coordFuture<0){
+			x_coordFuture+=Params.world_width;
 		}
-		if(y_coord<0){
-			y_coord+=Params.world_height;
+		if(y_coordFuture<0){
+			y_coordFuture+=Params.world_height;
 		}
-		x_coord=x_coord%Params.world_width;
-		y_coord=y_coord%Params.world_height;
+		x_coordFuture=x_coordFuture%Params.world_width;
+		y_coordFuture=y_coordFuture%Params.world_height;
 		
 		energy-=Params.look_energy_cost;
 		
 		
 		for(Critter c:population){
 			if(inTimeStep){
-				if(c.energy>0 && c.oldX==this.oldX && c.oldY==this.oldY){
+				if(c.energy>0 && c.oldX==x_coordFuture && c.oldY==y_coordFuture){
 					return c.toString();
 				}
 			}else{
-				if(c.energy>0 && c.x_coord==this.x_coord && c.y_coord==this.y_coord){
+				if(c.energy>0 && c.x_coord==x_coordFuture && c.y_coord==y_coordFuture){
 					return c.toString();
 				}
 			}

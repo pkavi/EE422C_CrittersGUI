@@ -14,6 +14,8 @@ import java.util.Scanner;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -38,7 +40,12 @@ public class Main extends Application {
     public static boolean DEBUG = false; // Use it or not, as you wish!
     static PrintStream old = System.out;	// if you want to restore output to console
     
-
+    //Variables created for gui
+    public static Canvas mainCanvas=null;//Main canvas which the world is displayed
+    public static GraphicsContext mainGraphicsContext=null;
+    public static int gridRows=10;
+    public static int gridCols=10;
+    public static double gridLineWidth=5;
     // Gets the package name.  The usage assumes that Critter and its subclasses are all in the same package.
     static {
         myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -50,37 +57,40 @@ public class Main extends Application {
      * and the second is test (for test output, where all output to be directed to a String), or nothing.
      */
     public static void main(String[] args) { 
-        if (args.length != 0) {
-            try {
-                inputFile = args[0];
-                kb = new Scanner(new File(inputFile));			
-            } catch (FileNotFoundException e) {
-                System.out.println("USAGE: java Main OR java Main <input file> <test output>");
-                e.printStackTrace();
-            } catch (NullPointerException e) {
-                System.out.println("USAGE: java Main OR java Main <input file>  <test output>");
-            }
-            if (args.length >= 2) {
-                if (args[1].equals("test")) { // if the word "test" is the second argument to java
-                    // Create a stream to hold the output
-                    testOutputString = new ByteArrayOutputStream();
-                    PrintStream ps = new PrintStream(testOutputString);
-                    // Save the old System.out.
-                    old = System.out;
-                    // Tell Java to use the special stream; all console output will be redirected here from now
-                    System.setOut(ps);
-                }
-            }
-        } else { // if no arguments to main
-            kb = new Scanner(System.in); // use keyboard and console
-        }
-
-        /* Do not alter the code above for your submission. */
-        /* Write your code below. */
+    	launch(args);
+    	
+//        if (args.length != 0) {
+//            try {
+//                inputFile = args[0];
+//                kb = new Scanner(new File(inputFile));			
+//            } catch (FileNotFoundException e) {
+//                System.out.println("USAGE: java Main OR java Main <input file> <test output>");
+//                e.printStackTrace();
+//            } catch (NullPointerException e) {
+//                System.out.println("USAGE: java Main OR java Main <input file>  <test output>");
+//            }
+//            if (args.length >= 2) {
+//                if (args[1].equals("test")) { // if the word "test" is the second argument to java
+//                    // Create a stream to hold the output
+//                    testOutputString = new ByteArrayOutputStream();
+//                    PrintStream ps = new PrintStream(testOutputString);
+//                    // Save the old System.out.
+//                    old = System.out;
+//                    // Tell Java to use the special stream; all console output will be redirected here from now
+//                    System.setOut(ps);
+//                }
+//            }
+//        } else { // if no arguments to main
+//            kb = new Scanner(System.in); // use keyboard and console
+//        }
+//
+//        /* Do not alter the code above for your submission. */
+//        /* Write your code below. */
+//        
+//        runProgram();
+//        /* Write your code above */
+//        System.out.flush();
         
-        runProgram();
-        /* Write your code above */
-        System.out.flush();
 
     }
     
@@ -240,7 +250,19 @@ public class Main extends Application {
     	}
     }
     protected static void fxDisplayGrid(){
-    	//launch(null);
+    	mainGraphicsContext.setFill(Color.WHITE);
+    	mainGraphicsContext.fillRect(0,0,800,600);
+    	mainGraphicsContext.setFill(Color.BLACK);
+    	double widthBetweenLines=(800-gridLineWidth)/(gridCols);
+    	double heightBetweenLines=(600-gridLineWidth)/(gridRows);
+    	for(int i=0;i<gridCols+1;i++){
+    		mainGraphicsContext.fillRect(i*widthBetweenLines,0,gridLineWidth,600);
+    	}
+    	for(int i=0;i<gridRows+1;i++){
+    		mainGraphicsContext.fillRect(0,i*heightBetweenLines,800,gridLineWidth);
+    	}
+    //	mainGraphicsContext.
+    	
     	
     	
     	
@@ -249,9 +271,17 @@ public class Main extends Application {
     }
     @Override
     public void start(Stage primaryStage){
+    	primaryStage.setTitle("Grid");
     	Group root=new Group();
-    	Scene scene=new Scene(root,800,600,Color.BLACK);
-    	primaryStage.setScene(scene);
+    	mainCanvas=new Canvas(800,600);
+    	mainGraphicsContext=mainCanvas.getGraphicsContext2D();
+    	
+    fxDisplayGrid();
+    root.getChildren().add(mainCanvas);
+    primaryStage.setScene(new Scene(root));
+    primaryStage.show();
+    
+    /*	primaryStage.setScene(scene);
     	primaryStage.show();
     	Group circles = new Group();
     	for (int i = 0; i < 30; i++) {
@@ -262,6 +292,7 @@ public class Main extends Application {
     	   circles.getChildren().add(circle);
     	}
     	root.getChildren().add(circles);
+    	*/
     	
     }
     /**
