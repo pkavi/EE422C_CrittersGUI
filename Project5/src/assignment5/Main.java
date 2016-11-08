@@ -46,6 +46,8 @@ public class Main extends Application {
     public static int gridRows=10;
     public static int gridCols=10;
     public static double gridLineWidth=5;
+    public static int screenHeight=600;
+    public static int screenWidth=800;
     // Gets the package name.  The usage assumes that Critter and its subclasses are all in the same package.
     static {
         myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -251,15 +253,15 @@ public class Main extends Application {
     }
     protected static void fxDisplayGrid(){
     	mainGraphicsContext.setFill(Color.WHITE);
-    	mainGraphicsContext.fillRect(0,0,800,600);
+    	mainGraphicsContext.fillRect(0,0,screenHeight,screenWidth);
     	mainGraphicsContext.setFill(Color.BLACK);
     	double widthBetweenLines=(800-gridLineWidth)/(gridCols);
     	double heightBetweenLines=(600-gridLineWidth)/(gridRows);
     	for(int i=0;i<gridCols+1;i++){
-    		mainGraphicsContext.fillRect(i*widthBetweenLines,0,gridLineWidth,600);
+    		mainGraphicsContext.fillRect(i*widthBetweenLines,0,gridLineWidth,screenHeight);
     	}
     	for(int i=0;i<gridRows+1;i++){
-    		mainGraphicsContext.fillRect(0,i*heightBetweenLines,800,gridLineWidth);
+    		mainGraphicsContext.fillRect(0,i*heightBetweenLines,screenWidth,gridLineWidth);
     	}
     //	mainGraphicsContext.
     	
@@ -273,7 +275,7 @@ public class Main extends Application {
     public void start(Stage primaryStage){
     	primaryStage.setTitle("Grid");
     	Group root=new Group();
-    	mainCanvas=new Canvas(800,600);
+    	mainCanvas=new Canvas(screenWidth,screenHeight);
     	mainGraphicsContext=mainCanvas.getGraphicsContext2D();
     	
     fxDisplayGrid();
