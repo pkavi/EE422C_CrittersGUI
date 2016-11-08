@@ -11,11 +11,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import assignment5.Critter;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -40,13 +51,17 @@ public class Main extends Application {
     public static boolean DEBUG = false; // Use it or not, as you wish!
     static PrintStream old = System.out;	// if you want to restore output to console
     
+    
+    
+    
+    
     //Variables created for gui
     public static Canvas mainCanvas=null;//Main canvas which the world is displayed
     public static GraphicsContext mainGraphicsContext=null;
-    public static int gridRows=10;
+    public static int gridRows=5;
     public static int gridCols=10;
-    public static double gridLineWidth=5;
-    public static int screenHeight=600;
+    public static double gridLineWidth=10;
+    public static int screenHeight=800;
     public static int screenWidth=800;
     // Gets the package name.  The usage assumes that Critter and its subclasses are all in the same package.
     static {
@@ -61,37 +76,7 @@ public class Main extends Application {
     public static void main(String[] args) { 
     	launch(args);
     	
-//        if (args.length != 0) {
-//            try {
-//                inputFile = args[0];
-//                kb = new Scanner(new File(inputFile));			
-//            } catch (FileNotFoundException e) {
-//                System.out.println("USAGE: java Main OR java Main <input file> <test output>");
-//                e.printStackTrace();
-//            } catch (NullPointerException e) {
-//                System.out.println("USAGE: java Main OR java Main <input file>  <test output>");
-//            }
-//            if (args.length >= 2) {
-//                if (args[1].equals("test")) { // if the word "test" is the second argument to java
-//                    // Create a stream to hold the output
-//                    testOutputString = new ByteArrayOutputStream();
-//                    PrintStream ps = new PrintStream(testOutputString);
-//                    // Save the old System.out.
-//                    old = System.out;
-//                    // Tell Java to use the special stream; all console output will be redirected here from now
-//                    System.setOut(ps);
-//                }
-//            }
-//        } else { // if no arguments to main
-//            kb = new Scanner(System.in); // use keyboard and console
-//        }
-//
-//        /* Do not alter the code above for your submission. */
-//        /* Write your code below. */
-//        
-//        runProgram();
-//        /* Write your code above */
-//        System.out.flush();
+
         
 
     }
@@ -99,171 +84,31 @@ public class Main extends Application {
     /**
      * Runs the whole program
      */
-    protected static void runProgram(){
-    	boolean quit=false;
-    	String input;
-    	String[] inputArgs;
-    	String firstArg;
-    	while(!quit){
-    		//Output prompt and see if command valid
-    		System.out.print("critters>");
-    		input=kb.nextLine();
-    		inputArgs=input.trim().split("\\s+");
-    		firstArg=inputArgs[0];
-    		if(firstArg.equals("quit")){
-    			quit=parseQuit(inputArgs,input);
-    		}
-    		else if(firstArg.equals("show")){
-    			parseShow(inputArgs, input);
-    		}
-    		else if(firstArg.equals("step")){
-    			parseStep(inputArgs,input);
-    		}
-    		else if(firstArg.equals("seed")){
-    			parseSeed(inputArgs,input);
-    		}
-    		else if(firstArg.equals("make")){
-    			parseMake(inputArgs,input);
-    		}else if(firstArg.equals("stats")){
-    			parseStats(inputArgs,input);
-    		}
-    		else{
-    			System.out.println("Invalid command");
-    		}
-    	}
-    }
-  
-    /**
-     * Parses any command that starts with show
-     * @param inputArgs String array of the input tokens for line
-     * @param input String of whole line input
-     */
-    protected static void parseShow(String[] inputArgs,String input){
-    	if(inputArgs.length==1 && inputArgs[0].equals("show")){
-    	Critter.displayWorld();
-    	}
-    	else{
-    		System.out.println("error processing: "+input.trim());
-    	}
-    }
-    
-    /**
-     * Parse any command that begins with quit
-     * @param inputArgs String array of the input tokens for line
-     * @param input  String of whole line input
-     * @return boolean True if user wants to quit
-     */
-    protected static boolean parseQuit(String[] inputArgs,String input){
-    	if(inputArgs.length==1 && inputArgs[0].equals("quit")){
-    		return true;
-    	}
-    	else{
-    		System.out.println("error processing: "+input.trim());
-    		return false;
-    	}
-    }
-    
-    /**
-     * Parses any command that begins with step
-     * @param inputArgs String array of the input tokens for line
-     * @param input String of whole line input
-     */
-    protected static void parseStep(String[] inputArgs,String input){
-    	int step=0;
-    	if(inputArgs.length==1 && inputArgs[0].equals("step")){
-    		Critter.worldTimeStep();
-    	}
-    	else if(inputArgs.length==2 && inputArgs[0].equals("step")){
-    		try{
-    			step=Integer.parseInt(inputArgs[1]);
-    		}catch(NumberFormatException ex){
-    			System.out.println("error processing: "+input.trim());
-    			return;
-    		}
-    		for(int i=0;i<step;i++){
-    			Critter.worldTimeStep();
-    		}
-    	}
-    	else{
-    		System.out.println("error processing: "+input.trim());
-    		
-    	}
-    }
-    
-    /**
-     * Parses any command that begins with seed
-     * @param inputArgs String array of the input tokens for line
-     * @param input String of whole line input
-     */
-    protected static void parseSeed(String[] inputArgs,String input){
-    	int seed=0;
-    	 if(inputArgs.length==2 && inputArgs[0].equals("seed")){
-    		try{
-    			seed=Integer.parseInt(inputArgs[1]);
-    		}catch(NumberFormatException ex){
-    			System.out.println("error processing: "+input.trim());
-    			return;
-    		}
-    		Critter.setSeed(seed);
-    	}
-    	else{
-    		System.out.println("error processing: "+input.trim());
-    		
-    	}
-    }
-    
-    /**
-     * Parses any command that begins with make
-     * @param inputArgs String array of the input tokens for line
-     * @param input String of whole line input
-     */
-    protected static void parseMake(String[] inputArgs,String input){
-    	String name;
-    	int numCreated=0;
-    	if(inputArgs.length==2  && inputArgs[0].equals("make")){
-    		name=inputArgs[1];
-    		try{
-    			Critter.makeCritter(name);
-    		}catch(InvalidCritterException ex){
-    			System.out.println("error processing: "+input.trim());
-    			return;
-    		}
-    	 } 
-    	 else if(inputArgs.length==3  && inputArgs[0].equals("make")){
- 			name=inputArgs[1];
- 			try{
- 				numCreated=Integer.parseInt(inputArgs[2]);
- 			}catch(NumberFormatException ex){
- 				System.out.println("error processing: "+input.trim());
- 				return;
- 			}
- 			try{
- 				for(int i=0;i<numCreated;i++){
- 					Critter.makeCritter(name);
- 				}
- 			}catch(InvalidCritterException ex){
- 				System.out.println("error processing: "+input.trim());
- 				return;
- 			}
-    	} 
-    	else{
-    		System.out.println("error processing: "+input.trim());
-    		
-    	}
-    }
-    protected static void fxDisplayGrid(){
+
+
+
+    protected static void fxDisplayGrid(Critter grid[][]){
     	mainGraphicsContext.setFill(Color.WHITE);
     	mainGraphicsContext.fillRect(0,0,screenHeight,screenWidth);
     	mainGraphicsContext.setFill(Color.BLACK);
-    	double widthBetweenLines=(800-gridLineWidth)/(gridCols);
-    	double heightBetweenLines=(600-gridLineWidth)/(gridRows);
+    	double widthBetweenLines=(screenWidth-gridLineWidth*1.0)/(gridCols);
+    	double heightBetweenLines=(screenHeight-gridLineWidth*1.0)/(gridRows);
     	for(int i=0;i<gridCols+1;i++){
     		mainGraphicsContext.fillRect(i*widthBetweenLines,0,gridLineWidth,screenHeight);
     	}
     	for(int i=0;i<gridRows+1;i++){
     		mainGraphicsContext.fillRect(0,i*heightBetweenLines,screenWidth,gridLineWidth);
     	}
-    //	mainGraphicsContext.
+    	
+    	System.out.println("dsad");
+    	if(grid==null){
+    		return;
+    	}
+    	for(int i=0;i<grid.length;i++){
+    		for(int j=0;j<grid[0].length;j++){
+    			
+    		}
+    	}
     	
     	
     	
@@ -273,58 +118,253 @@ public class Main extends Application {
     }
     @Override
     public void start(Stage primaryStage){
+    	
+    	Stage s=new Stage();
+    	s.setTitle("dasd");
+    	
+    	
+    	
+    	
+    	GridPane topLevelGridPane= new  GridPane();
+    	topLevelGridPane.setHgap(10);
+        topLevelGridPane.setVgap(10);
+        topLevelGridPane.setPadding(new Insets(0, 10, 0, 10));
+    	
+    	
+ 
+        
+        
+        
+        
+    	
+    	
+    	
+    	addMakeCritterGridPane(topLevelGridPane);
+    	addSingleTimeStepGridPane(topLevelGridPane);
+    	addStatisticsGridPane(topLevelGridPane);
+    	addSeedGridPane(topLevelGridPane);
+    	
+    	
+    	
+    	topLevelGridPane.setGridLinesVisible(true);
+    	
+    	
+    s.setScene(new Scene(topLevelGridPane));
+    	s.show();
+    	
+    	
+    	
+    	
+           
+           
+           
     	primaryStage.setTitle("Grid");
     	Group root=new Group();
     	mainCanvas=new Canvas(screenWidth,screenHeight);
     	mainGraphicsContext=mainCanvas.getGraphicsContext2D();
+    
     	
-    fxDisplayGrid();
+    	
+    fxDisplayGrid(null);
     root.getChildren().add(mainCanvas);
     primaryStage.setScene(new Scene(root));
     primaryStage.show();
     
-    /*	primaryStage.setScene(scene);
-    	primaryStage.show();
-    	Group circles = new Group();
-    	for (int i = 0; i < 30; i++) {
-    	   Circle circle = new Circle(150, Color.web("white", 0.05));
-    	   circle.setStrokeType(StrokeType.OUTSIDE);
-    	   circle.setStroke(Color.web("white", 0.16));
-    	   circle.setStrokeWidth(4);
-    	   circles.getChildren().add(circle);
-    	}
-    	root.getChildren().add(circles);
-    	*/
+
     	
     }
-    /**
-     * Parses any command that begins with stats
-     * @param inputArgs String array of the input tokens for line
-     * @param input String of whole line input
-     */
-    protected static void parseStats(String[] inputArgs,String input){
-    	int seed=0;
-    	 if(inputArgs.length==2 && inputArgs[0].equals("stats")){
-    		 List<Critter> res;
-    		 try{
-    		 res=Critter.getInstances(inputArgs[1]);
-    		 runStatsMethod(inputArgs[1],res);
-    		 }catch(InvalidCritterException ex){
-    			 //To finish
-    			 if(DEBUG){
-    				 System.out.println("Problem in parseStatsMethod");
-    			 }
-    			 System.out.println("error processing: "+input.trim());
-    			 
-    			 return;
-    		 }
-    		 
-    	}
-    	else{
-    		System.out.println("error processing: "+input.trim());
-    		
-    	}
+    private static void addSeedGridPane(GridPane mainGridPane){
+    	GridPane seedGridPane=new GridPane();
+        seedGridPane.setHgap(10);
+        seedGridPane.setVgap(10);
+        seedGridPane.setPadding(new Insets(0, 10, 0, 10));
+       
+        Label seedLabel=new Label();
+    	seedLabel.setText("Set Seed Tool");
+    	seedGridPane.add(seedLabel, 0,0);
+    	
+    	Label seedNumberTextLabel=new Label();
+    	seedNumberTextLabel.setText("Seed Number");
+    	seedGridPane.add(seedNumberTextLabel,0,1);
+    	
+    	TextField seedNumberTextField=new TextField();
+    	seedGridPane.add(seedNumberTextField,1,1);
+    	
+    	
+    	Button seedButton = new Button();
+        seedButton.setText("Set seed");
+        seedButton.setOnAction(e->seedEventHandler(seedNumberTextField.getText()));
+        seedGridPane.add(seedButton, 0, 2);
+        
+        mainGridPane.add(seedGridPane, 0,3);
+    	
+    	
     }
+    private static void seedEventHandler(String text){
+    	int seed;
+    	try{
+			seed=Integer.parseInt(text);
+		}catch(NumberFormatException ex){
+			Alert alert = new Alert(AlertType.INFORMATION);
+			
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			if(text.trim().length()>0){
+			alert.setContentText("Number not entered: "+text.trim());
+			}
+			else{
+				alert.setContentText("No number entered");
+			}
+			alert.showAndWait();
+			return;
+		}
+		Critter.setSeed(seed);
+    	
+    	
+    }
+    private static void addSingleTimeStepGridPane(GridPane mainGridPane){
+    	 
+        GridPane singleFrameTimeStepGridPane=new GridPane();
+        singleFrameTimeStepGridPane.setHgap(10);
+        singleFrameTimeStepGridPane.setVgap(10);
+        singleFrameTimeStepGridPane.setPadding(new Insets(0, 10, 0, 10));
+       
+        Label singleFrameTimeStepLabel=new Label();
+    	singleFrameTimeStepLabel.setText("Single Frame Time Step Tool");
+    	singleFrameTimeStepGridPane.add(singleFrameTimeStepLabel, 0,0);
+    	
+    	Label singleFrameTimeStepNumberLabel=new Label();
+    	singleFrameTimeStepNumberLabel.setText("Number of Steps");
+    	singleFrameTimeStepGridPane.add(singleFrameTimeStepNumberLabel,0,1);
+    	
+    	TextField singleFrameTimeStepNumberTextField=new TextField();
+    	singleFrameTimeStepGridPane.add(singleFrameTimeStepNumberTextField,1,1);
+    	
+    	
+    	Button singleFrameTimeStepButton = new Button();
+        singleFrameTimeStepButton.setText("Step");
+        singleFrameTimeStepButton.setOnAction(e->singleFrameTimeStepEventHandler(singleFrameTimeStepNumberTextField.getText()));
+        singleFrameTimeStepGridPane.add(singleFrameTimeStepButton, 0, 2);
+        
+        
+        mainGridPane.add(singleFrameTimeStepGridPane, 0,1 );
+    	
+    	
+    	
+    	
+    	
+    }
+
+    private static void singleFrameTimeStepEventHandler(String text){
+    	int step;
+    	try{
+			step=Integer.parseInt(text);
+		}catch(NumberFormatException ex){
+			
+			Alert alert = new Alert(AlertType.INFORMATION);
+			
+			alert.setTitle("Error");
+			alert.setHeaderText(null);
+			if(text.trim().length()>0){
+			alert.setContentText("Number not entered: "+text.trim());
+			}
+			else{
+				alert.setContentText("No number entered");
+			}
+			alert.showAndWait();
+			return;
+		}
+		for(int i=0;i<step;i++){
+			Critter.worldTimeStep();
+		}
+    	
+    	
+    }
+    private static void addStatisticsGridPane(GridPane mainGridPane){
+    	GridPane statisticsGridPane=new GridPane();
+        statisticsGridPane.setHgap(10);
+        statisticsGridPane.setVgap(10);
+        statisticsGridPane.setPadding(new Insets(0, 10, 0, 10));
+       
+        Label statisticsLabel=new Label();
+    	statisticsLabel.setText("Statistics Tool");
+    	statisticsGridPane.add(statisticsLabel, 0,0);
+    	
+    	Label statisticsTypeLabel=new Label();
+    	statisticsTypeLabel.setText("Type");
+    	statisticsGridPane.add(statisticsTypeLabel,0,1);
+    	
+    	ComboBox<String> statisticsComboBox=new ComboBox<String>();
+    	statisticsGridPane.add(statisticsComboBox,1,1);
+    	statisticsComboBox.getItems().addAll(
+	            "Highest",
+	            "High",
+	            "Normal",
+	            "Low",
+	            "Lowest" 
+	        ); 
+    	
+    statisticsComboBox.setOnAction(e->statisticsEventHandler(statisticsComboBox.getValue()));
+        
+        mainGridPane.add(statisticsGridPane, 0,2 );
+    	
+    	
+    	
+    }
+    private static void statisticsEventHandler(String text){
+    	
+    	
+    }
+private static void addMakeCritterGridPane(GridPane mainGridPane){
+	GridPane makeCritterGridPane=new GridPane();
+    makeCritterGridPane.setHgap(10);
+    makeCritterGridPane.setVgap(10);
+    makeCritterGridPane.setPadding(new Insets(0, 10, 0, 10));
+	
+	Label makeCritterLabel=new Label();
+	makeCritterLabel.setText("Make Critter Tool");
+	makeCritterGridPane.add(makeCritterLabel, 0,0);
+	
+	Label critterTypeLabel=new Label();
+	critterTypeLabel.setText("Type");
+	makeCritterGridPane.add(critterTypeLabel, 0,1);
+	
+	ComboBox<String> critterTypeComboBox=new ComboBox<String>();
+	 critterTypeComboBox.getItems().addAll(
+	            "Highest",
+	            "High",
+	            "Normal",
+	            "Low",
+	            "Lowest" 
+	        ); 
+	makeCritterGridPane.add(critterTypeComboBox,1,1);
+	
+	
+	
+	Label critterNumberLabel=new Label();
+	critterNumberLabel.setText("Number");
+	makeCritterGridPane.add(critterNumberLabel,0,2);
+	
+	TextField critterNumberTextField=new TextField();
+	makeCritterGridPane.add(critterNumberTextField,1,2);
+	
+	
+	Button makeCritterButton = new Button();
+    makeCritterButton.setText("Add Critters");
+    makeCritterButton.setOnAction(e->makeCritterHandler(critterTypeComboBox.getValue()));
+    makeCritterGridPane.add(makeCritterButton, 0,3 );
+    
+    
+    mainGridPane.add(makeCritterGridPane, 0, 0);
+	
+	
+}
+private static void makeCritterHandler(String text){
+	
+	
+	
+}
+
     //See http://stackoverflow.com/questions/9042740/call-static-method-given-a-class-object-in-java
 
     /**

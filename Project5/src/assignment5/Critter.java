@@ -393,6 +393,7 @@ public abstract class Critter {
 		grid=new Critter[Params.world_height][Params.world_width];
 	}
 	
+	
 	/**
 	 * Simulates one time step of the world
 	 */
@@ -569,7 +570,7 @@ public abstract class Critter {
 	 * Displays the grid with critters
 	 */
 	public static void displayWorld() {
-		displayHeader(grid[0].length);
+	/*	displayHeader(grid[0].length);
 		for(int row=0;row<grid.length;row++){
 			System.out.print("|");
 			for(int col=0;col<grid[0].length;col++){
@@ -583,7 +584,8 @@ public abstract class Critter {
 			System.out.print("|\n");
 		}
 		displayHeader(grid[0].length);
-		Main.fxDisplayGrid();
+		*/
+		Main.fxDisplayGrid(grid);
 	}
 	
 	/**
