@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import assignment5.Critter;
+import assignment5.Critter.CritterShape;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -58,11 +59,11 @@ public class Main extends Application {
     //Variables created for gui
     public static Canvas mainCanvas=null;//Main canvas which the world is displayed
     public static GraphicsContext mainGraphicsContext=null;
-    public static int gridRows=5;
-    public static int gridCols=10;
+    public static int gridRows=100;
+    public static int gridCols=100;
     public static double gridLineWidth=10;
-    public static int screenHeight=800;
-    public static int screenWidth=800;
+    public static double screenHeight=800;
+    public static double screenWidth=800;
     // Gets the package name.  The usage assumes that Critter and its subclasses are all in the same package.
     static {
         myPackage = Critter.class.getPackage().toString().split(" ")[1];
@@ -87,10 +88,12 @@ public class Main extends Application {
 
 
 
-    protected static void fxDisplayGrid(Critter grid[][]){
+    protected static void fxDisplayGrid(Critter[][] grid){
     	mainGraphicsContext.setFill(Color.WHITE);
-    	mainGraphicsContext.fillRect(0,0,screenHeight,screenWidth);
+    	mainGraphicsContext.fillRect(0,0,1920,1080);
     	mainGraphicsContext.setFill(Color.BLACK);
+    	gridLineWidth=Math.min(screenWidth/gridCols*1.0, screenHeight/gridRows*1.0)/7;
+    	
     	double widthBetweenLines=(screenWidth-gridLineWidth*1.0)/(gridCols);
     	double heightBetweenLines=(screenHeight-gridLineWidth*1.0)/(gridRows);
     	for(int i=0;i<gridCols+1;i++){
@@ -100,15 +103,11 @@ public class Main extends Application {
     		mainGraphicsContext.fillRect(0,i*heightBetweenLines,screenWidth,gridLineWidth);
     	}
     	
-    	System.out.println("dsad");
     	if(grid==null){
     		return;
     	}
-    	for(int i=0;i<grid.length;i++){
-    		for(int j=0;j<grid[0].length;j++){
-    			
-    		}
-    	}
+    	drawCritters(grid,widthBetweenLines,heightBetweenLines);
+    	
     	
     	
     	
@@ -116,6 +115,23 @@ public class Main extends Application {
     	
     	
     }
+    protected static void drawCritters(Critter[][] grid,double widthBetweenLines, double heightBetweenLines){
+    	for(int i=0;i<grid.length;i++){
+    		for(int j=0;j<grid[0].length;j++){
+    			if(grid[i][j]==null){
+    				continue;
+    			}
+    			CritterShape val=grid[i][j].viewShape();
+    			if(val==CritterShape.CIRCLE){
+    				mainGraphicsContext.fillOval(j*widthBetweenLines+gridLineWidth,i*heightBetweenLines+gridLineWidth,widthBetweenLines-gridLineWidth,heightBetweenLines-gridLineWidth);
+    			}
+    			
+    		}
+    	}
+    	
+    	
+    }
+    
     @Override
     public void start(Stage primaryStage){
     	
@@ -146,33 +162,48 @@ public class Main extends Application {
     	
     	
     	
-    	topLevelGridPane.setGridLinesVisible(true);
+    //	topLevelGridPane.setGridLinesVisible(true);
     	
     	
     s.setScene(new Scene(topLevelGridPane));
     	s.show();
     	
     	
-    	
+    	s.setOnHiding(e->System.exit(0));
     	
            
            
            
     	primaryStage.setTitle("Grid");
     	Group root=new Group();
-    	mainCanvas=new Canvas(screenWidth,screenHeight);
+    	mainCanvas=new Canvas(1920,1080);
     	mainGraphicsContext=mainCanvas.getGraphicsContext2D();
     
     	
+    
     	
-    fxDisplayGrid(null);
+    	
+    
     root.getChildren().add(mainCanvas);
     primaryStage.setScene(new Scene(root));
-    primaryStage.show();
+   primaryStage.setWidth(screenWidth);
+    primaryStage.setHeight(screenHeight);
+    fxDisplayGrid(null);
     
+    primaryStage.show();
+    primaryStage.widthProperty().addListener((obs,oldVal,newVal)->resize(primaryStage));
+    primaryStage.heightProperty().addListener((obs,oldVal,newVal)->resize(primaryStage));
 
     	
     }
+    private static void resize(Stage primaryStage){
+    	screenWidth=primaryStage.getWidth()-16;
+    	screenHeight=primaryStage.getHeight()-39;
+    	System.out.println("Canvas Dim: "+screenWidth+"x"+screenHeight);
+    	Critter.displayWorld();
+    	System.out.println("Screen Dim: " + primaryStage.getWidth()+"x"+primaryStage.getHeight());
+    }
+
     private static void addSeedGridPane(GridPane mainGridPane){
     	GridPane seedGridPane=new GridPane();
         seedGridPane.setHgap(10);
@@ -219,7 +250,27 @@ public class Main extends Application {
 			return;
 		}
 		Critter.setSeed(seed);
+		
+    //	ArrayList<String> f=listClassFilesInFolder(System.getProperty("user.dir"));
+    	//for(String x:f){
+    	//	System.out.println(x);
+    	//}
     	
+    }
+    private static ArrayList<String> listClassFilesInFolder(String path){
+    	File folder=new File(path);
+    	File[] listOfFiles = folder.listFiles();
+    	ArrayList<String> classFileNames=new ArrayList<String>();
+        for (int i = 0; i < listOfFiles.length; i++) {
+          if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".class")) {
+            classFileNames.add(listOfFiles[i].getName());
+          } 
+          //else if (listOfFiles[i].isDirectory()) {
+            //System.out.println("Directory " + listOfFiles[i].getName());
+          //}
+        }
+        
+    	return classFileNames;
     	
     }
     private static void addSingleTimeStepGridPane(GridPane mainGridPane){
@@ -277,7 +328,7 @@ public class Main extends Application {
 		for(int i=0;i<step;i++){
 			Critter.worldTimeStep();
 		}
-    	
+    	Critter.displayWorld();
     	
     }
     private static void addStatisticsGridPane(GridPane mainGridPane){
@@ -317,6 +368,7 @@ public class Main extends Application {
     }
 private static void addMakeCritterGridPane(GridPane mainGridPane){
 	GridPane makeCritterGridPane=new GridPane();
+//	makeCritterGridPane.setGridLinesVisible(true);;
     makeCritterGridPane.setHgap(10);
     makeCritterGridPane.setVgap(10);
     makeCritterGridPane.setPadding(new Insets(0, 10, 0, 10));

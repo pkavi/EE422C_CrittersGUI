@@ -10,6 +10,8 @@ package assignment5;
 import java.io.PrintStream;
 import java.util.List;
 
+import javafx.scene.paint.Color;
+
 /* see the PDF for descriptions of the methods and fields in this class
  * you may add fields, methods or inner classes to Critter ONLY if you make your additions private
  * no new public, protected or default-package code or data can be added to Critter
@@ -24,6 +26,12 @@ import java.util.List;
  * In addition, any Critter extending this class must implement a fight and doTimeStep method
  */
 public abstract class Critter {
+	public enum CritterShape { CIRCLE, SQUARE, TRIANGLE, DIAMOND, STAR
+	}
+	
+	
+	
+	
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
@@ -81,6 +89,17 @@ public abstract class Critter {
 			walkRun=true;
 		}
 		energy-=Params.walk_energy_cost;
+	}
+	protected CritterShape viewShape(){
+		return CritterShape.CIRCLE;
+		
+	}
+	protected Color viewOutlineColor(){
+		
+		return Color.BLACK;
+	}
+	protected Color viewFillColor(){
+		return Color.BLACK;
 	}
 	protected String look(int direction, boolean steps){
 		int x_coordFuture=this.x_coord;
