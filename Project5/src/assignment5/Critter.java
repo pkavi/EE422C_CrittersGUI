@@ -91,7 +91,7 @@ public abstract class Critter {
 		energy-=Params.walk_energy_cost;
 	}
 	protected CritterShape viewShape(){
-		return CritterShape.CIRCLE;
+		return CritterShape.STAR;
 		
 	}
 	protected Color viewOutlineColor(){
@@ -99,7 +99,7 @@ public abstract class Critter {
 		return Color.BLACK;
 	}
 	protected Color viewFillColor(){
-		return Color.BLACK;
+		return Color.RED;
 	}
 	protected String look(int direction, boolean steps){
 		int x_coordFuture=this.x_coord;

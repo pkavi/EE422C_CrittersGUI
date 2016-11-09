@@ -52,15 +52,26 @@ public class Main extends Application {
     public static boolean DEBUG = false; // Use it or not, as you wish!
     static PrintStream old = System.out;	// if you want to restore output to console
     
+    //Shape final constants to draw normalized to 1 by 1 square
+    final static double[][] triangle={{0.50,0.06},{0.06,0.78},{0.94,0.78}};
+    final static double[][] square={{0.12,0.12},{0.12,0.88},{0.88,0.88},{0.88,0.12}};
+    final static double[][] diamond={{0.50,0.06},{0.25,0.50},{0.50,0.94},{0.75,0.50}};
+    final static double[][] star={{0.20,0.95},{0.50,0.75},{0.80,0.95},{0.68,0.60},{0.95,0.40},{0.62,0.38},{0.50,0.05},{0.38,0.38},{0.05,0.40},{0.32,0.64}};
     
+   
+    //Max size of canvas
+    final static double maxWidth=1000;
+    final static double maxHeight=1000;
     
+    //Canvas adjustment; needed to adjust artifacts in drawing
+    final static double widthAdjust=16;
+    final static double heightAdjust=39;
     
-    
-    //Variables created for gui
+    //Variables created for drawing the grid correctly depending on stage dimensions
     public static Canvas mainCanvas=null;//Main canvas which the world is displayed
     public static GraphicsContext mainGraphicsContext=null;
-    public static int gridRows=100;
-    public static int gridCols=100;
+    public static int gridRows=10;//Reset to correct attribute in code
+    public static int gridCols=10;
     public static double gridLineWidth=10;
     public static double screenHeight=800;
     public static double screenWidth=800;
@@ -76,24 +87,13 @@ public class Main extends Application {
      */
     public static void main(String[] args) { 
     	launch(args);
-    	
-
-        
-
     }
     
-    /**
-     * Runs the whole program
-     */
-
-
-
     protected static void fxDisplayGrid(Critter[][] grid){
     	mainGraphicsContext.setFill(Color.WHITE);
     	mainGraphicsContext.fillRect(0,0,1920,1080);
     	mainGraphicsContext.setFill(Color.BLACK);
     	gridLineWidth=Math.min(screenWidth/gridCols*1.0, screenHeight/gridRows*1.0)/7;
-    	
     	double widthBetweenLines=(screenWidth-gridLineWidth*1.0)/(gridCols);
     	double heightBetweenLines=(screenHeight-gridLineWidth*1.0)/(gridRows);
     	for(int i=0;i<gridCols+1;i++){
@@ -107,14 +107,9 @@ public class Main extends Application {
     		return;
     	}
     	drawCritters(grid,widthBetweenLines,heightBetweenLines);
-    	
-    	
-    	
-    	
-    	
-    	
-    	
+
     }
+
     protected static void drawCritters(Critter[][] grid,double widthBetweenLines, double heightBetweenLines){
     	for(int i=0;i<grid.length;i++){
     		for(int j=0;j<grid[0].length;j++){
@@ -122,84 +117,101 @@ public class Main extends Application {
     				continue;
     			}
     			CritterShape val=grid[i][j].viewShape();
+    			mainGraphicsContext.setFill(grid[i][j].viewFillColor());
+    			mainGraphicsContext.setStroke(grid[i][j].viewOutlineColor());
+    			mainGraphicsContext.setLineWidth(gridLineWidth/2);
     			if(val==CritterShape.CIRCLE){
+    				mainGraphicsContext.strokeOval(j*widthBetweenLines+gridLineWidth,i*heightBetweenLines+gridLineWidth,widthBetweenLines-gridLineWidth,heightBetweenLines-gridLineWidth);
     				mainGraphicsContext.fillOval(j*widthBetweenLines+gridLineWidth,i*heightBetweenLines+gridLineWidth,widthBetweenLines-gridLineWidth,heightBetweenLines-gridLineWidth);
     			}
-    			
+    			else if(val==CritterShape.DIAMOND){
+    				drawPolygon(diamond,i,j,widthBetweenLines,heightBetweenLines);
+    			}
+    			else if(val==CritterShape.STAR){
+    				drawPolygon(star,i,j,widthBetweenLines,heightBetweenLines);
+    			}
+    			else if(val==CritterShape.TRIANGLE){
+    				drawPolygon(triangle,i,j,widthBetweenLines,heightBetweenLines);
+    			}
+    			else if(val==CritterShape.SQUARE){
+    				drawPolygon(square,i,j,widthBetweenLines,heightBetweenLines);
+    			}
     		}
     	}
-    	
-    	
+    }
+
+    private static void drawPolygon(double[][] shapeCoordinates,int row, int col, double widthBetweenLines,double heightBetweenLines){
+    	double[] xCoords=new double[shapeCoordinates.length];
+    	double[] yCoords=new double[shapeCoordinates.length];
+    	double horizontalSize=widthBetweenLines-gridLineWidth;
+    	double verticalSize=heightBetweenLines-gridLineWidth;
+    	double horizontalOffset=widthBetweenLines*col+gridLineWidth;
+    	double verticalOffset=heightBetweenLines*row+gridLineWidth;
+    	for(int i=0;i<shapeCoordinates.length;i++){
+    		xCoords[i]=shapeCoordinates[i][0]*horizontalSize+horizontalOffset;
+    		yCoords[i]=shapeCoordinates[i][1]*verticalSize+verticalOffset;
+    	}
+    	mainGraphicsContext.strokePolygon(xCoords,yCoords,shapeCoordinates.length);
+    	mainGraphicsContext.fillPolygon(xCoords,yCoords,shapeCoordinates.length);
     }
     
     @Override
     public void start(Stage primaryStage){
     	
-    	Stage s=new Stage();
-    	s.setTitle("dasd");
-    	
-    	
-    	
+    	Stage secondaryStage=new Stage();
+    	secondaryStage.setTitle("Critter Controls");
     	
     	GridPane topLevelGridPane= new  GridPane();
     	topLevelGridPane.setHgap(10);
         topLevelGridPane.setVgap(10);
         topLevelGridPane.setPadding(new Insets(0, 10, 0, 10));
-    	
-    	
- 
         
-        
-        
-        
-    	
-    	
-    	
     	addMakeCritterGridPane(topLevelGridPane);
-    	addSingleTimeStepGridPane(topLevelGridPane);
+    	addSingleFrameTimeStepGridPane(topLevelGridPane);
     	addStatisticsGridPane(topLevelGridPane);
     	addSeedGridPane(topLevelGridPane);
     	
+     
+        secondaryStage.setScene(new Scene(topLevelGridPane));
+        secondaryStage.setOnHiding(e->System.exit(0));
+    	
+        secondaryStage.show();
     	
     	
-    //	topLevelGridPane.setGridLinesVisible(true);
-    	
-    	
-    s.setScene(new Scene(topLevelGridPane));
-    	s.show();
-    	
-    	
-    	s.setOnHiding(e->System.exit(0));
-    	
-           
-           
-           
-    	primaryStage.setTitle("Grid");
+    	primaryStage.setTitle("Critter Display");
     	Group root=new Group();
     	mainCanvas=new Canvas(1920,1080);
     	mainGraphicsContext=mainCanvas.getGraphicsContext2D();
-    
+    	root.getChildren().add(mainCanvas);
+    	primaryStage.setScene(new Scene(root));
     	
-    
+    	autoResizeEventHandler(primaryStage);
+    	fxDisplayGrid(null);
     	
+    	primaryStage.show();
     	
-    
-    root.getChildren().add(mainCanvas);
-    primaryStage.setScene(new Scene(root));
-   primaryStage.setWidth(screenWidth);
-    primaryStage.setHeight(screenHeight);
-    fxDisplayGrid(null);
-    
-    primaryStage.show();
-    primaryStage.widthProperty().addListener((obs,oldVal,newVal)->resize(primaryStage));
-    primaryStage.heightProperty().addListener((obs,oldVal,newVal)->resize(primaryStage));
-
+    	primaryStage.widthProperty().addListener((obs,oldVal,newVal)->resizedWindowEventHandler(primaryStage));
+    	primaryStage.heightProperty().addListener((obs,oldVal,newVal)->resizedWindowEventHandler(primaryStage));
     	
+    	primaryStage.setOnHiding(e->System.exit(0));
     }
-    private static void resize(Stage primaryStage){
-    	screenWidth=primaryStage.getWidth()-16;
-    	screenHeight=primaryStage.getHeight()-39;
-    	System.out.println("Canvas Dim: "+screenWidth+"x"+screenHeight);
+
+    private static void autoResizeEventHandler(Stage primaryStage){
+    	gridRows=Params.world_height;
+    	gridCols=Params.world_width;
+    screenWidth=Math.min(gridCols*15,maxWidth);
+    screenHeight=Math.min(gridRows*15, maxHeight);
+    screenWidth=Math.max(screenWidth, 100);
+    screenHeight=Math.max(screenHeight, 100);
+    primaryStage.setWidth(screenWidth+widthAdjust);
+	primaryStage.setHeight(screenHeight+heightAdjust);
+    
+    }
+    
+    private static void resizedWindowEventHandler(Stage primaryStage){
+    	screenWidth=primaryStage.getWidth()-widthAdjust;
+    	screenHeight=primaryStage.getHeight()-heightAdjust;
+    	
     	Critter.displayWorld();
     	System.out.println("Screen Dim: " + primaryStage.getWidth()+"x"+primaryStage.getHeight());
     }
@@ -221,27 +233,24 @@ public class Main extends Application {
     	TextField seedNumberTextField=new TextField();
     	seedGridPane.add(seedNumberTextField,1,1);
     	
-    	
     	Button seedButton = new Button();
         seedButton.setText("Set seed");
         seedButton.setOnAction(e->seedEventHandler(seedNumberTextField.getText()));
         seedGridPane.add(seedButton, 0, 2);
         
         mainGridPane.add(seedGridPane, 0,3);
-    	
-    	
     }
+    
     private static void seedEventHandler(String text){
     	int seed;
     	try{
 			seed=Integer.parseInt(text);
 		}catch(NumberFormatException ex){
 			Alert alert = new Alert(AlertType.INFORMATION);
-			
 			alert.setTitle("Error");
 			alert.setHeaderText(null);
 			if(text.trim().length()>0){
-			alert.setContentText("Number not entered: "+text.trim());
+				alert.setContentText("Number not entered: "+text.trim());
 			}
 			else{
 				alert.setContentText("No number entered");
@@ -250,12 +259,6 @@ public class Main extends Application {
 			return;
 		}
 		Critter.setSeed(seed);
-		
-    //	ArrayList<String> f=listClassFilesInFolder(System.getProperty("user.dir"));
-    	//for(String x:f){
-    	//	System.out.println(x);
-    	//}
-    	
     }
     private static ArrayList<String> listClassFilesInFolder(String path){
     	File folder=new File(path);
@@ -265,16 +268,10 @@ public class Main extends Application {
           if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".class")) {
             classFileNames.add(listOfFiles[i].getName());
           } 
-          //else if (listOfFiles[i].isDirectory()) {
-            //System.out.println("Directory " + listOfFiles[i].getName());
-          //}
         }
-        
     	return classFileNames;
-    	
     }
-    private static void addSingleTimeStepGridPane(GridPane mainGridPane){
-    	 
+    private static void addSingleFrameTimeStepGridPane(GridPane mainGridPane){
         GridPane singleFrameTimeStepGridPane=new GridPane();
         singleFrameTimeStepGridPane.setHgap(10);
         singleFrameTimeStepGridPane.setVgap(10);
@@ -291,19 +288,12 @@ public class Main extends Application {
     	TextField singleFrameTimeStepNumberTextField=new TextField();
     	singleFrameTimeStepGridPane.add(singleFrameTimeStepNumberTextField,1,1);
     	
-    	
     	Button singleFrameTimeStepButton = new Button();
         singleFrameTimeStepButton.setText("Step");
         singleFrameTimeStepButton.setOnAction(e->singleFrameTimeStepEventHandler(singleFrameTimeStepNumberTextField.getText()));
         singleFrameTimeStepGridPane.add(singleFrameTimeStepButton, 0, 2);
         
-        
         mainGridPane.add(singleFrameTimeStepGridPane, 0,1 );
-    	
-    	
-    	
-    	
-    	
     }
 
     private static void singleFrameTimeStepEventHandler(String text){
@@ -311,13 +301,11 @@ public class Main extends Application {
     	try{
 			step=Integer.parseInt(text);
 		}catch(NumberFormatException ex){
-			
 			Alert alert = new Alert(AlertType.INFORMATION);
-			
 			alert.setTitle("Error");
 			alert.setHeaderText(null);
 			if(text.trim().length()>0){
-			alert.setContentText("Number not entered: "+text.trim());
+				alert.setContentText("Number not entered: "+text.trim());
 			}
 			else{
 				alert.setContentText("No number entered");
@@ -328,8 +316,7 @@ public class Main extends Application {
 		for(int i=0;i<step;i++){
 			Critter.worldTimeStep();
 		}
-    	Critter.displayWorld();
-    	
+    	Critter.displayWorld();  	
     }
     private static void addStatisticsGridPane(GridPane mainGridPane){
     	GridPane statisticsGridPane=new GridPane();
@@ -354,13 +341,9 @@ public class Main extends Application {
 	            "Low",
 	            "Lowest" 
 	        ); 
-    	
-    statisticsComboBox.setOnAction(e->statisticsEventHandler(statisticsComboBox.getValue()));
-        
-        mainGridPane.add(statisticsGridPane, 0,2 );
-    	
-    	
-    	
+    	statisticsComboBox.setOnAction(e->statisticsEventHandler(statisticsComboBox.getValue()));
+  
+        mainGridPane.add(statisticsGridPane,0,2);
     }
     private static void statisticsEventHandler(String text){
     	
@@ -368,7 +351,6 @@ public class Main extends Application {
     }
 private static void addMakeCritterGridPane(GridPane mainGridPane){
 	GridPane makeCritterGridPane=new GridPane();
-//	makeCritterGridPane.setGridLinesVisible(true);;
     makeCritterGridPane.setHgap(10);
     makeCritterGridPane.setVgap(10);
     makeCritterGridPane.setPadding(new Insets(0, 10, 0, 10));
@@ -391,8 +373,6 @@ private static void addMakeCritterGridPane(GridPane mainGridPane){
 	        ); 
 	makeCritterGridPane.add(critterTypeComboBox,1,1);
 	
-	
-	
 	Label critterNumberLabel=new Label();
 	critterNumberLabel.setText("Number");
 	makeCritterGridPane.add(critterNumberLabel,0,2);
@@ -400,16 +380,12 @@ private static void addMakeCritterGridPane(GridPane mainGridPane){
 	TextField critterNumberTextField=new TextField();
 	makeCritterGridPane.add(critterNumberTextField,1,2);
 	
-	
 	Button makeCritterButton = new Button();
     makeCritterButton.setText("Add Critters");
     makeCritterButton.setOnAction(e->makeCritterHandler(critterTypeComboBox.getValue()));
     makeCritterGridPane.add(makeCritterButton, 0,3 );
     
-    
     mainGridPane.add(makeCritterGridPane, 0, 0);
-	
-	
 }
 private static void makeCritterHandler(String text){
 	
