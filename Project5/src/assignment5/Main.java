@@ -199,19 +199,17 @@ public class Main extends Application {
     private static void autoResizeEventHandler(Stage primaryStage){
     	gridRows=Params.world_height;
     	gridCols=Params.world_width;
-    screenWidth=Math.min(gridCols*15,maxWidth);
-    screenHeight=Math.min(gridRows*15, maxHeight);
-    screenWidth=Math.max(screenWidth, 100);
-    screenHeight=Math.max(screenHeight, 100);
-    primaryStage.setWidth(screenWidth+widthAdjust);
-	primaryStage.setHeight(screenHeight+heightAdjust);
-    
+    	screenWidth=Math.min(gridCols*15,maxWidth);
+    	screenHeight=Math.min(gridRows*15, maxHeight);
+    	screenWidth=Math.max(screenWidth, 100);
+    	screenHeight=Math.max(screenHeight, 100);
+    	primaryStage.setWidth(screenWidth+widthAdjust);
+    	primaryStage.setHeight(screenHeight+heightAdjust);
     }
     
     private static void resizedWindowEventHandler(Stage primaryStage){
     	screenWidth=primaryStage.getWidth()-widthAdjust;
     	screenHeight=primaryStage.getHeight()-heightAdjust;
-    	
     	Critter.displayWorld();
     	System.out.println("Screen Dim: " + primaryStage.getWidth()+"x"+primaryStage.getHeight());
     }
@@ -260,16 +258,77 @@ public class Main extends Application {
 		}
 		Critter.setSeed(seed);
     }
-    private static ArrayList<String> listClassFilesInFolder(String path){
+    private static ArrayList<String> getCrittersInPath(String path){
+    	
+    	
+    	int oldWorldWidth = Params.world_width;
+		int oldWorldHeight = Params.world_height;
+		int oldWalkEnergyCost = Params.walk_energy_cost;
+		int oldRunEnergyCost = Params.run_energy_cost;
+		int oldRestEnergyCost = Params.rest_energy_cost;
+		int oldMinReproduceEnergy = Params.min_reproduce_energy;
+		int oldRefreshAlgaeCount = Params.refresh_algae_count;
+		int oldPhotosynthesisEnergy = Params.photosynthesis_energy_amount;
+		int oldStartEnergy = Params.start_energy;
+		int oldLookEnergy = Params.look_energy_cost;
+
+    	
     	File folder=new File(path);
-    	File[] listOfFiles = folder.listFiles();
-    	ArrayList<String> classFileNames=new ArrayList<String>();
-        for (int i = 0; i < listOfFiles.length; i++) {
-          if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".class")) {
-            classFileNames.add(listOfFiles[i].getName());
-          } 
+    	ArrayList<File> classFiles=new ArrayList<File>();
+    	getAllClassFilesRecursive(classFiles,path);
+    	ArrayList<String> critterNames=new ArrayList<String>();
+    	for(int i = 0; i < classFiles.size(); i++){
+			try{
+				String className = classFiles.get(i).getName().replace(".class", ""); 
+				Class<?> testingClass = Class.forName(myPackage + "." + className); 
+				if(testingClass.newInstance() instanceof Critter) {
+					critterNames.add(className);
+				}
+				
+			}
+			catch(LinkageError ex){
+				
+			}
+			catch(ClassCastException ex){ 
+				//try the next file
+			}
+			catch(ClassNotFoundException cnf){ 
+				//try the next file
+			}
+			catch (IllegalAccessException ec) {
+				//try the next file
+			} 
+			catch(InstantiationException in) {
+				//try the next file
+			}
+			catch (IllegalArgumentException ee) {
+				//try the next file
+			} 
+		}
+    	Params.world_width=oldWorldWidth;
+		 Params.world_height=oldWorldHeight;
+		Params.walk_energy_cost=oldWalkEnergyCost;
+		Params.run_energy_cost=oldRunEnergyCost;
+		Params.rest_energy_cost=oldRestEnergyCost;
+		Params.min_reproduce_energy=oldMinReproduceEnergy;
+		Params.refresh_algae_count=oldRefreshAlgaeCount ;
+		Params.photosynthesis_energy_amount=oldPhotosynthesisEnergy;
+		Params.start_energy=oldStartEnergy;
+		Params.look_energy_cost=oldLookEnergy;
+    	return critterNames;
+    }
+    private static void getAllClassFilesRecursive(ArrayList<File> f,String path){
+        File folder = new File(path);
+        //get all the files from a directory
+        File[] filesList = folder.listFiles();
+        for (File file : filesList){
+            if (file.isDirectory()){
+                getAllClassFilesRecursive(f,file.getAbsolutePath());
+            }
+            else if (file.isFile() && file.getName().endsWith(".class")){
+                f.add(file);
+            } 
         }
-    	return classFileNames;
     }
     private static void addSingleFrameTimeStepGridPane(GridPane mainGridPane){
         GridPane singleFrameTimeStepGridPane=new GridPane();
@@ -335,11 +394,7 @@ public class Main extends Application {
     	ComboBox<String> statisticsComboBox=new ComboBox<String>();
     	statisticsGridPane.add(statisticsComboBox,1,1);
     	statisticsComboBox.getItems().addAll(
-	            "Highest",
-	            "High",
-	            "Normal",
-	            "Low",
-	            "Lowest" 
+	            getCrittersInPath(".")
 	        ); 
     	statisticsComboBox.setOnAction(e->statisticsEventHandler(statisticsComboBox.getValue()));
   
@@ -365,11 +420,7 @@ private static void addMakeCritterGridPane(GridPane mainGridPane){
 	
 	ComboBox<String> critterTypeComboBox=new ComboBox<String>();
 	 critterTypeComboBox.getItems().addAll(
-	            "Highest",
-	            "High",
-	            "Normal",
-	            "Low",
-	            "Lowest" 
+	            getCrittersInPath(".")
 	        ); 
 	makeCritterGridPane.add(critterTypeComboBox,1,1);
 	
@@ -382,14 +433,52 @@ private static void addMakeCritterGridPane(GridPane mainGridPane){
 	
 	Button makeCritterButton = new Button();
     makeCritterButton.setText("Add Critters");
-    makeCritterButton.setOnAction(e->makeCritterHandler(critterTypeComboBox.getValue()));
+    makeCritterButton.setOnAction(e->makeCritterHandler(critterTypeComboBox.getValue(),critterNumberTextField.getText()));
     makeCritterGridPane.add(makeCritterButton, 0,3 );
     
     mainGridPane.add(makeCritterGridPane, 0, 0);
 }
-private static void makeCritterHandler(String text){
+private static void makeCritterHandler(String textComboBox,String textNumberField){
+	if(textComboBox==null){
+		
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Error");
+		alert.setHeaderText(null);
+		alert.setContentText("Critter type not chosen");
+		alert.showAndWait();
+		return;
+	}
 	
-	
+	int numberOfCritters;
+	try{
+		numberOfCritters=Integer.parseInt(textNumberField.trim());
+	}catch(NumberFormatException ex){
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Error");
+		alert.setHeaderText(null);
+		if(textNumberField.trim().length()>0){
+			alert.setContentText("Number not entered: "+textNumberField.trim());
+		}
+		else{
+			alert.setContentText("No number entered");
+		}
+		alert.showAndWait();
+		return;
+	}
+	try{
+	for(int i=0;i<numberOfCritters;i++){
+		Critter.makeCritter(textComboBox);
+		System.out.println("dsadad");
+	}
+	}catch(InvalidCritterException ex){
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Error");
+		alert.setHeaderText(null);
+		
+			alert.setContentText("Invalid Critter Exception thrown");
+		
+	}
+	Critter.displayWorld();
 	
 }
 

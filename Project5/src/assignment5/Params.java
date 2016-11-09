@@ -6,8 +6,8 @@ package assignment5;
  */
 
 public class Params {
-	public  static int world_width = 1;
-	public  static int world_height = 1
+	public  static int world_width = 5;
+	public  static int world_height = 5;
 			;
 	public  static int walk_energy_cost = 2;
 	public  static int run_energy_cost = 5;
