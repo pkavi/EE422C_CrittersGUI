@@ -257,6 +257,13 @@ public class Main extends Application {
 			return;
 		}
 		Critter.setSeed(seed);
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setTitle("Seed Set");
+		alert.setHeaderText(null);
+			alert.setContentText("Seed set to "+text.trim());
+		
+	
+		alert.showAndWait();
     }
     private static ArrayList<String> getCrittersInPath(String path){
     	
@@ -329,6 +336,9 @@ public class Main extends Application {
                 f.add(file);
             } 
         }
+    }
+    private static void quitButton(GridPane mainGridPane){
+    	
     }
     private static void addSingleFrameTimeStepGridPane(GridPane mainGridPane){
         GridPane singleFrameTimeStepGridPane=new GridPane();
