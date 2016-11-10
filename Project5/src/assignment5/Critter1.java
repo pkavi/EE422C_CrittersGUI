@@ -53,7 +53,12 @@ public class Critter1 extends Critter{
 		if(getEnergy()>fightEnergyMinimum){
 			return true;
 		}else{
-			run(Critter.getRandomInt(8));
+			int place=Critter.getRandomInt(8);
+			boolean isEmpty=look(place,true)==null;
+			if(isEmpty){
+				run(place);
+				return false;
+			}
 			return true;
 		}
 	}
