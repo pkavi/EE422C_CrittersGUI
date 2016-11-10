@@ -120,7 +120,7 @@ public class Main extends Application {
     		return;
     	}
     	drawCritters(grid,widthBetweenLines,heightBetweenLines);
-    	
+    	statisticsEventHandler(statisticsComboBox.getValue());
 
     }
 

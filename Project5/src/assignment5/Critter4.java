@@ -53,6 +53,10 @@ public class Critter4 extends Critter{
      * {@inheritDoc}
      */
 	public void doTimeStep() {
-		run(Critter.getRandomInt(8));
+		
+		if(look(1,true)==null){
+			run(1);
+			
+		}
 	}
 }
