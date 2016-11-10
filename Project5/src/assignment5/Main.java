@@ -289,16 +289,7 @@ public class Main extends Application {
     private static ArrayList<String> getCrittersInPath(String path){
     	
     	
-    	int oldWorldWidth = Params.world_width;
-		int oldWorldHeight = Params.world_height;
-		int oldWalkEnergyCost = Params.walk_energy_cost;
-		int oldRunEnergyCost = Params.run_energy_cost;
-		int oldRestEnergyCost = Params.rest_energy_cost;
-		int oldMinReproduceEnergy = Params.min_reproduce_energy;
-		int oldRefreshAlgaeCount = Params.refresh_algae_count;
-		int oldPhotosynthesisEnergy = Params.photosynthesis_energy_amount;
-		int oldStartEnergy = Params.start_energy;
-		int oldLookEnergy = Params.look_energy_cost;
+
 
     	
     	File folder=new File(path);
@@ -333,16 +324,7 @@ public class Main extends Application {
 				//try the next file
 			} 
 		}
-    	Params.world_width=oldWorldWidth;
-		 Params.world_height=oldWorldHeight;
-		Params.walk_energy_cost=oldWalkEnergyCost;
-		Params.run_energy_cost=oldRunEnergyCost;
-		Params.rest_energy_cost=oldRestEnergyCost;
-		Params.min_reproduce_energy=oldMinReproduceEnergy;
-		Params.refresh_algae_count=oldRefreshAlgaeCount ;
-		Params.photosynthesis_energy_amount=oldPhotosynthesisEnergy;
-		Params.start_energy=oldStartEnergy;
-		Params.look_energy_cost=oldLookEnergy;
+    
     	return critterNames;
     }
     private static void getAllClassFilesRecursive(ArrayList<File> f,String path){
