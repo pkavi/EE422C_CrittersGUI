@@ -1,8 +1,11 @@
 /* CRITTERS Critter2.java
- * EE422C Project 4 submission by
+ * EE422C Project 5 submission by
  * Pranav Kavikondala
  * pk6994
  * 16470
+ * Daniel John
+ * dcj597
+ * 16480
  * Slip days used: 0
  * Fall 2016
  */

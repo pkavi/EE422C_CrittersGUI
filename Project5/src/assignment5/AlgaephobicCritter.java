@@ -1,3 +1,14 @@
+/* CRITTERS Algaephobic.java
+ * EE422C Project 5 submission by
+ * Pranav Kavikondala
+ * pk6994
+ * 16470
+ * Daniel John
+ * dcj597
+ * 16480
+ * Slip days used: 0
+ * Fall 2016
+ */
 package assignment5;
 
 //import project5.Critter.CritterShape;

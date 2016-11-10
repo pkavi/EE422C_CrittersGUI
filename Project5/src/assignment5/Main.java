@@ -1,8 +1,11 @@
 /* CRITTERS Main.java
- * EE422C Project 4 submission by
+ * EE422C Project 5 submission by
  * Pranav Kavikondala
  * pk6994
  * 16470
+ * Daniel John
+ * dcj597
+ * 16480
  * Slip days used: 0
  * Fall 2016
  */
@@ -456,6 +459,10 @@ public class Main extends Application {
         mainGridPane.add(statisticsGridPane,0,2);
     }
     private static void statisticsEventHandler(String text){
+    	if(text==null){
+    		statisticsDisplayLabel.setText("Critter not selected");
+    		return;
+    	}
     	String displayString;
     		 List<Critter> res;
     		 try{
