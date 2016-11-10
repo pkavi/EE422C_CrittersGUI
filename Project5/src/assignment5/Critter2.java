@@ -7,6 +7,9 @@
  * Fall 2016
  */
 package assignment5;
+
+import assignment5.Critter.CritterShape;
+
 /**
  * @author Pranav Kavikondala
  * 
@@ -28,7 +31,9 @@ public class Critter2 extends Critter{
 	public Critter2() {
 
 	}
-	
+	public  CritterShape viewShape(){
+		return CritterShape.CIRCLE;
+	}
 
 	/**
 	 * Critter2 will not fight against Craig

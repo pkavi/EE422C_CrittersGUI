@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import assignment5.InvalidCritterException;
 import assignment5.Critter;
 import assignment5.Critter.CritterShape;
 import javafx.application.Application;
@@ -53,19 +54,28 @@ public class Main extends Application {
     static PrintStream old = System.out;	// if you want to restore output to console
     
     //Shape final constants to draw normalized to 1 by 1 square
-    final static double[][] triangle={{0.50,0.06},{0.06,0.78},{0.94,0.78}};
-    final static double[][] square={{0.12,0.12},{0.12,0.88},{0.88,0.88},{0.88,0.12}};
-    final static double[][] diamond={{0.50,0.06},{0.25,0.50},{0.50,0.94},{0.75,0.50}};
-    final static double[][] star={{0.20,0.95},{0.50,0.75},{0.80,0.95},{0.68,0.60},{0.95,0.40},{0.62,0.38},{0.50,0.05},{0.38,0.38},{0.05,0.40},{0.32,0.64}};
+    private final static double[][] triangle={{0.50,0.06},{0.06,0.78},{0.94,0.78}};
+    private final static double[][] square={{0.12,0.12},{0.12,0.88},{0.88,0.88},{0.88,0.12}};
+    private final static double[][] diamond={{0.50,0.06},{0.25,0.50},{0.50,0.94},{0.75,0.50}};
+    private final static double[][] star={{0.20,0.95},{0.50,0.75},{0.80,0.95},{0.68,0.60},{0.95,0.40},{0.62,0.38},{0.50,0.05},{0.38,0.38},{0.05,0.40},{0.32,0.64}};
     
+    //Oval/circle draw scaling to fit in center of circle
+    private final static double scalingCircle=0.5;
    
-    //Max size of canvas
-    final static double maxWidth=1000;
-    final static double maxHeight=1000;
+    //Max size of board when automatically sized
+    private final static double maxWidth=1000;
+    private final static double maxHeight=1000;
+    
+    private final static double minWidth=200;
+    private final static double minHeight=200;
     
     //Canvas adjustment; needed to adjust artifacts in drawing
-    final static double widthAdjust=16;
-    final static double heightAdjust=39;
+    private final static double widthAdjust=16;
+    private final static double heightAdjust=39;
+    
+    //Stats label
+    public static Label statisticsDisplayLabel;
+    public static ComboBox<String> statisticsComboBox;
     
     //Variables created for drawing the grid correctly depending on stage dimensions
     public static Canvas mainCanvas=null;//Main canvas which the world is displayed
@@ -90,7 +100,7 @@ public class Main extends Application {
     }
     
     protected static void fxDisplayGrid(Critter[][] grid){
-    	mainGraphicsContext.setFill(Color.WHITE);
+    	mainGraphicsContext.setFill(Color.MAROON);
     	mainGraphicsContext.fillRect(0,0,1920,1080);
     	mainGraphicsContext.setFill(Color.BLACK);
     	gridLineWidth=Math.min(screenWidth/gridCols*1.0, screenHeight/gridRows*1.0)/7;
@@ -107,6 +117,7 @@ public class Main extends Application {
     		return;
     	}
     	drawCritters(grid,widthBetweenLines,heightBetweenLines);
+    	
 
     }
 
@@ -121,8 +132,8 @@ public class Main extends Application {
     			mainGraphicsContext.setStroke(grid[i][j].viewOutlineColor());
     			mainGraphicsContext.setLineWidth(gridLineWidth/2);
     			if(val==CritterShape.CIRCLE){
-    				mainGraphicsContext.strokeOval(j*widthBetweenLines+gridLineWidth,i*heightBetweenLines+gridLineWidth,widthBetweenLines-gridLineWidth,heightBetweenLines-gridLineWidth);
-    				mainGraphicsContext.fillOval(j*widthBetweenLines+gridLineWidth,i*heightBetweenLines+gridLineWidth,widthBetweenLines-gridLineWidth,heightBetweenLines-gridLineWidth);
+    				mainGraphicsContext.strokeOval(j*widthBetweenLines+gridLineWidth+scalingCircle*(widthBetweenLines-gridLineWidth)/2.0,i*heightBetweenLines+gridLineWidth+scalingCircle*(heightBetweenLines-gridLineWidth)/2.0,(widthBetweenLines-gridLineWidth)*scalingCircle,(heightBetweenLines-gridLineWidth)*scalingCircle);
+    				mainGraphicsContext.fillOval(j*widthBetweenLines+gridLineWidth+scalingCircle*(widthBetweenLines-gridLineWidth)/2.0,i*heightBetweenLines+gridLineWidth+scalingCircle*(heightBetweenLines-gridLineWidth)/2.0,(widthBetweenLines-gridLineWidth)*scalingCircle,(heightBetweenLines-gridLineWidth)*scalingCircle);
     			}
     			else if(val==CritterShape.DIAMOND){
     				drawPolygon(diamond,i,j,widthBetweenLines,heightBetweenLines);
@@ -170,6 +181,9 @@ public class Main extends Application {
     	addSingleFrameTimeStepGridPane(topLevelGridPane);
     	addStatisticsGridPane(topLevelGridPane);
     	addSeedGridPane(topLevelGridPane);
+    	addQuitButton(topLevelGridPane);
+    	
+    
     	
      
         secondaryStage.setScene(new Scene(topLevelGridPane));
@@ -186,6 +200,8 @@ public class Main extends Application {
     	primaryStage.setScene(new Scene(root));
     	
     	autoResizeEventHandler(primaryStage);
+    
+    	resizedWindowEventHandler(primaryStage);
     	fxDisplayGrid(null);
     	
     	primaryStage.show();
@@ -201,8 +217,8 @@ public class Main extends Application {
     	gridCols=Params.world_width;
     	screenWidth=Math.min(gridCols*15,maxWidth);
     	screenHeight=Math.min(gridRows*15, maxHeight);
-    	screenWidth=Math.max(screenWidth, 100);
-    	screenHeight=Math.max(screenHeight, 100);
+    	screenWidth=Math.max(screenWidth, minWidth);
+    	screenHeight=Math.max(screenHeight, minHeight);
     	primaryStage.setWidth(screenWidth+widthAdjust);
     	primaryStage.setHeight(screenHeight+heightAdjust);
     }
@@ -211,7 +227,7 @@ public class Main extends Application {
     	screenWidth=primaryStage.getWidth()-widthAdjust;
     	screenHeight=primaryStage.getHeight()-heightAdjust;
     	Critter.displayWorld();
-    	System.out.println("Screen Dim: " + primaryStage.getWidth()+"x"+primaryStage.getHeight());
+    	//System.out.println("Screen Dim: " + primaryStage.getWidth()+"x"+primaryStage.getHeight());
     }
 
     private static void addSeedGridPane(GridPane mainGridPane){
@@ -235,6 +251,8 @@ public class Main extends Application {
         seedButton.setText("Set seed");
         seedButton.setOnAction(e->seedEventHandler(seedNumberTextField.getText()));
         seedGridPane.add(seedButton, 0, 2);
+        
+        seedGridPane.setStyle("-fx-border: 100px solid; -fx-border-color: red;-fx-background-color: #C0C0C0;");
         
         mainGridPane.add(seedGridPane, 0,3);
     }
@@ -337,8 +355,23 @@ public class Main extends Application {
             } 
         }
     }
-    private static void quitButton(GridPane mainGridPane){
-    	
+    private static void addQuitButton(GridPane mainGridPane){
+    	GridPane quitButtonGridPane=new GridPane();
+        quitButtonGridPane.setHgap(10);
+        quitButtonGridPane.setVgap(10);
+        quitButtonGridPane.setPadding(new Insets(0, 10, 0, 10));
+        
+        Button seedButton = new Button();
+        seedButton.setText("Quit");
+        seedButton.setOnAction(e->System.exit(0));
+        quitButtonGridPane.add(seedButton, 0, 0);
+        
+        
+        quitButtonGridPane.setStyle("-fx-border: 100px solid; -fx-border-color: red;-fx-background-color: #C0C0C0;");
+       
+        
+        mainGridPane.add(quitButtonGridPane, 0, 4);
+        
     }
     private static void addSingleFrameTimeStepGridPane(GridPane mainGridPane){
         GridPane singleFrameTimeStepGridPane=new GridPane();
@@ -361,6 +394,9 @@ public class Main extends Application {
         singleFrameTimeStepButton.setText("Step");
         singleFrameTimeStepButton.setOnAction(e->singleFrameTimeStepEventHandler(singleFrameTimeStepNumberTextField.getText()));
         singleFrameTimeStepGridPane.add(singleFrameTimeStepButton, 0, 2);
+        
+        
+        singleFrameTimeStepGridPane.setStyle("-fx-border: 100px solid; -fx-border-color: red;-fx-background-color: #C0C0C0;");
         
         mainGridPane.add(singleFrameTimeStepGridPane, 0,1 );
     }
@@ -401,17 +437,44 @@ public class Main extends Application {
     	statisticsTypeLabel.setText("Type");
     	statisticsGridPane.add(statisticsTypeLabel,0,1);
     	
-    	ComboBox<String> statisticsComboBox=new ComboBox<String>();
+    	
+    	
+    	
+    	statisticsComboBox=new ComboBox<String>();
     	statisticsGridPane.add(statisticsComboBox,1,1);
     	statisticsComboBox.getItems().addAll(
 	            getCrittersInPath(".")
 	        ); 
     	statisticsComboBox.setOnAction(e->statisticsEventHandler(statisticsComboBox.getValue()));
+    	
+    	statisticsDisplayLabel=new Label();
+    	statisticsDisplayLabel.setText("Critter not selected");
+    	statisticsGridPane.add(statisticsDisplayLabel,0, 2);
   
+    	statisticsGridPane.setStyle("-fx-border: 100px solid; -fx-border-color: red;-fx-background-color: #C0C0C0;");
+    	
         mainGridPane.add(statisticsGridPane,0,2);
     }
     private static void statisticsEventHandler(String text){
-    	
+    	String displayString;
+    		 List<Critter> res;
+    		 try{
+    		 res=Critter.getInstances(text);
+    		 displayString=runStatsMethod(text,res);
+    		 }catch(InvalidCritterException ex){
+    			 
+    			 if(DEBUG){
+    				 System.out.println("Problem in parseStatsMethod");
+    			 }
+    			 Alert alert = new Alert(AlertType.INFORMATION);
+    				alert.setTitle("Error");
+    				alert.setHeaderText(null);
+    				alert.setContentText("Invalid Critter Exception");
+    				alert.showAndWait();
+    				return;
+    			
+    		 }
+    	statisticsDisplayLabel.setText(displayString);
     	
     }
 private static void addMakeCritterGridPane(GridPane mainGridPane){
@@ -446,6 +509,8 @@ private static void addMakeCritterGridPane(GridPane mainGridPane){
     makeCritterButton.setOnAction(e->makeCritterHandler(critterTypeComboBox.getValue(),critterNumberTextField.getText()));
     makeCritterGridPane.add(makeCritterButton, 0,3 );
     
+    makeCritterGridPane.setStyle("-fx-border: 100px solid; -fx-border-color: red;-fx-background-color: #C0C0C0;");
+    
     mainGridPane.add(makeCritterGridPane, 0, 0);
 }
 private static void makeCritterHandler(String textComboBox,String textNumberField){
@@ -478,7 +543,7 @@ private static void makeCritterHandler(String textComboBox,String textNumberFiel
 	try{
 	for(int i=0;i<numberOfCritters;i++){
 		Critter.makeCritter(textComboBox);
-		System.out.println("dsadad");
+		
 	}
 	}catch(InvalidCritterException ex){
 		Alert alert = new Alert(AlertType.INFORMATION);
@@ -500,11 +565,12 @@ private static void makeCritterHandler(String textComboBox,String textNumberFiel
      * @param res List of critters of critter_class_name
      * @throws InvalidCritterException If some error 
      */
-    protected static void runStatsMethod(String critter_class_name,List<Critter> res) throws InvalidCritterException{
+    protected static String runStatsMethod(String critter_class_name,List<Critter> res) throws InvalidCritterException{
+    	String returnedValue;
     	try{
     	Class<?> inClass=Class.forName(myPackage+"."+critter_class_name);
     	Method inMethod=inClass.getMethod("runStats",List.class);
-    			inMethod.invoke(null,res);
+    			returnedValue=(String)inMethod.invoke(null,res);
     	}catch(Exception ex){
     		if(DEBUG){
     		ex.printStackTrace(System.out);
@@ -513,7 +579,7 @@ private static void makeCritterHandler(String textComboBox,String textNumberFiel
     		throw new InvalidCritterException(critter_class_name);
     		
     	}
-    	
+    	return returnedValue;
     }
    
     

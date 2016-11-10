@@ -7,6 +7,9 @@
  * Fall 2016
  */
 package assignment5;
+
+import assignment5.Critter.CritterShape;
+
 /**
  * @author Pranav Kavikondala
  * Selective  Run Reproduce Critter: This critter will have minimum fight energy and reproduce energy set by the Param file and will fight at any opportunity where energy is enough or  will try to run away.
@@ -52,6 +55,10 @@ public class Critter1 extends Critter{
 		}
 	}
 
+	@Override
+	public  CritterShape viewShape(){
+		return CritterShape.DIAMOND;
+	}
 	
 	/**
 	 * Makes Critter1 reproduce and run based on time step number and energy

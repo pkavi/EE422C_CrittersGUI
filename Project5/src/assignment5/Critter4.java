@@ -7,6 +7,9 @@
  * Fall 2016
  */
 package assignment5;
+
+import assignment5.Critter.CritterShape;
+
 /**
  * @author Pranav Kavikondala
  * 
@@ -27,7 +30,9 @@ public class Critter4 extends Critter{
 	public Critter4() {
 
 	}
-	
+	public  CritterShape viewShape(){
+		return CritterShape.TRIANGLE;
+	}
 	/**
 	 * Critter4 will never fight
 	 * @param critterType String representing the other critter

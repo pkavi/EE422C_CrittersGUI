@@ -1,8 +1,5 @@
 package assignment5;
 
-/*
- * Example critter
- */
 public class Craig extends Critter {
 	
 	@Override
@@ -53,7 +50,8 @@ public class Craig extends Critter {
 		dir = (dir + turn) % 8;
 	}
 
-	public static void runStats(java.util.List<Critter> craigs) {
+	public static String runStats(java.util.List<Critter> craigs) {
+		String resultString="";
 		int total_straight = 0;
 		int total_left = 0;
 		int total_right = 0;
@@ -70,6 +68,21 @@ public class Craig extends Critter {
 		System.out.print("" + total_back / (GENE_TOTAL * 0.01 * craigs.size()) + "% back   ");
 		System.out.print("" + total_right / (GENE_TOTAL * 0.01 * craigs.size()) + "% right   ");
 		System.out.print("" + total_left / (GENE_TOTAL * 0.01 * craigs.size()) + "% left   ");
+		resultString=resultString+"" + craigs.size() + " total Craigs    ";
+		resultString=resultString+"" + total_straight / (GENE_TOTAL * 0.01 * craigs.size()) + "% straight   ";
+		resultString=resultString+"" + total_back / (GENE_TOTAL * 0.01 * craigs.size()) + "% back   ";
+		resultString=resultString+"" + total_right / (GENE_TOTAL * 0.01 * craigs.size()) + "% right   ";
+		resultString=resultString+"" + total_left / (GENE_TOTAL * 0.01 * craigs.size()) + "% left   ";
+		resultString=resultString+"\n";
+		
 		System.out.println();
+		return resultString;
 	}
+	
+	@Override
+	public CritterShape viewShape() { return CritterShape.SQUARE; }
+
+	@Override
+	public javafx.scene.paint.Color viewOutlineColor() { return javafx.scene.paint.Color.BLUE; }
+
 }
