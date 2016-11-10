@@ -45,7 +45,7 @@ public class TragicCritter extends Critter {
 		}
 	}
 //Need to only have one parameter
-	public static String runStats(java.util.List<Critter> avoidingCritters,int i) {
+	public static String runStats(java.util.List<Critter> avoidingCritters) {
 		if(avoidingCritters.size() >= 2) {
 			return "Still can't get to each other";
 		}
